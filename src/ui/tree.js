@@ -55,6 +55,10 @@ setTimeout(function () {
   });
 });
 
+exports.reload = function () {
+  onChange(fs.configs[""].current);
+};
+
 function onChange(hash) {
   renderChild("", modes.commit, hash);
   // Run any hooks
@@ -264,13 +268,15 @@ function showRow(path) {
 }
 
 
-function activateDoc(row, hard) {
+exports.activateDoc = activateDoc;
+function activateDoc(row, hard, callback) {
   var path = row.path;
   setActive(path);
   if (!active) return setDoc();
   row.call(fs.readBlob, function (entry) {
     setDoc(row, entry.blob);
     if (hard) editor.focus();
+    if (callback) callback();
   });
 }
 
@@ -296,8 +302,9 @@ function updateRemote(row) {
 
 function commitChanges(row) {
   row.call(fs.readCommit, function (entry) {
+    var config = fs.configs[row.path];
     var githubName = fs.isGithub(row.path);
-    if (githubName) {
+    if (githubName && !config.passphrase) {
       var previewDiff = "https://github.com/" + githubName + "/commit/" + entry.hash;
       window.open(previewDiff);
     }

@@ -12,6 +12,9 @@
   window.defs = defs;
   document.body.textContent = "";
 
+  modules["forge.js"] = window.forge;
+  ready["forge.js"] = true;
+
   requireAsync("main.js");
 
   function requireAsync(name, callback) {
@@ -26,6 +29,7 @@
     if (!(/\.[^\/]+$/.test(name))) name += ".js";
     if (name in modules) return modules[name].exports;
     var exports = {};
+    if (!(name in defs)) throw new Error("Unknown module " + name);
     var module = modules[name] = {exports:exports};
     if (defs[name].fn(module, exports) !== undefined) throw new Error("Use `module.exports = value`, not `return value`");
     return module.exports;
